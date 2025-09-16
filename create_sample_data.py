@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Create a small sample dataset for testing the RAG system
-"""
 import json
 import sys
 from pathlib import Path
@@ -19,7 +16,6 @@ def main():
     
     print(f"Loaded {len(scraped_data)} pages")
     
-    # Select only high-quality pages with good content
     sample_pages = []
     for page in scraped_data:
         if (page.get('word_count', 0) > 100 and 
@@ -32,13 +28,11 @@ def main():
     
     print(f"Selected {len(sample_pages)} high-quality pages for sample dataset")
     
-    # Save sample data
     with open('sample_scraped_data.json', 'w', encoding='utf-8') as f:
         json.dump(sample_pages, f, indent=2, ensure_ascii=False)
     
     print("Sample data saved to sample_scraped_data.json")
     
-    # Create simple processed documents
     processed_docs = []
     for i, page in enumerate(sample_pages):
         doc = {
@@ -59,7 +53,6 @@ def main():
         }
         processed_docs.append(doc)
     
-    # Save processed documents
     with open('processed_documents.json', 'w', encoding='utf-8') as f:
         json.dump(processed_docs, f, indent=2, ensure_ascii=False)
     

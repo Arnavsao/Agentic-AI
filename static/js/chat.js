@@ -1,7 +1,3 @@
-/**
- * GAIL RAG Chatbot JavaScript
- * Handles chat interactions, API calls, and UI updates
- */
 
 class GAILChatbot {
     constructor() {
@@ -20,10 +16,8 @@ class GAILChatbot {
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
 
-        // Focus on input when page loads
         messageInput.focus();
 
-        // Auto-resize textarea
         messageInput.addEventListener('input', () => {
             messageInput.style.height = 'auto';
             messageInput.style.height = messageInput.scrollHeight + 'px';
@@ -89,16 +83,13 @@ class GAILChatbot {
             return;
         }
 
-        // Clear input if not a suggestion
         if (!message) {
             messageInput.value = '';
             messageInput.style.height = 'auto';
         }
 
-        // Add user message to chat
         this.addMessage(messageText, 'user');
 
-        // Show typing indicator
         this.showTypingIndicator();
 
         try {
@@ -119,13 +110,10 @@ class GAILChatbot {
 
             const data = await response.json();
             
-            // Hide typing indicator
             this.hideTypingIndicator();
 
-            // Add bot response to chat
             this.addBotMessage(data.answer, data.sources, data.confidence);
 
-            // Update suggestions
             if (data.suggested_questions) {
                 this.updateSuggestions(data.suggested_questions);
             }
@@ -166,10 +154,8 @@ class GAILChatbot {
         messageDiv.appendChild(messageContent);
         chatMessages.appendChild(messageDiv);
 
-        // Scroll to bottom
         this.scrollToBottom();
 
-        // Store in conversation history
         this.conversationHistory.push({
             sender: sender,
             text: text,
@@ -196,7 +182,6 @@ class GAILChatbot {
         messageContent.appendChild(messageText);
         messageContent.appendChild(messageTime);
 
-        // Add confidence badge
         if (confidence > 0) {
             const confidenceBadge = document.createElement('div');
             confidenceBadge.className = 'confidence-badge';
@@ -204,7 +189,6 @@ class GAILChatbot {
             messageContent.appendChild(confidenceBadge);
         }
 
-        // Add sources if available
         if (sources && sources.length > 0) {
             const sourcesDiv = document.createElement('div');
             sourcesDiv.className = 'message-sources';
@@ -231,10 +215,8 @@ class GAILChatbot {
         messageDiv.appendChild(messageContent);
         chatMessages.appendChild(messageDiv);
 
-        // Scroll to bottom
         this.scrollToBottom();
 
-        // Store in conversation history
         this.conversationHistory.push({
             sender: 'bot',
             text: text,
@@ -245,7 +227,6 @@ class GAILChatbot {
     }
 
     formatMessage(text) {
-        // Convert line breaks to HTML
         return text.replace(/\n/g, '<br>');
     }
 
@@ -282,7 +263,6 @@ class GAILChatbot {
                 }
             });
 
-            // Clear chat messages except the initial bot message
             const chatMessages = document.getElementById('chat-messages');
             const initialMessage = chatMessages.querySelector('.bot-message');
             chatMessages.innerHTML = '';
@@ -290,10 +270,8 @@ class GAILChatbot {
                 chatMessages.appendChild(initialMessage);
             }
 
-            // Clear conversation history
             this.conversationHistory = [];
 
-            // Show success message
             this.addBotMessage('Conversation history cleared. How can I help you today?', [], 1);
 
         } catch (error) {
@@ -312,7 +290,6 @@ class GAILChatbot {
     }
 }
 
-// Global functions for HTML onclick handlers
 let chatbot;
 
 function handleKeyPress(event) {
@@ -340,7 +317,6 @@ function clearHistory() {
     }
 }
 
-// Initialize chatbot when page loads
 document.addEventListener('DOMContentLoaded', () => {
     chatbot = new GAILChatbot();
 });

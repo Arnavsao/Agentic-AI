@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Simple data processing script with memory optimization
-"""
 import json
 import sys
 from pathlib import Path
@@ -20,7 +17,6 @@ def main():
     
     print(f"Loaded {len(scraped_data)} pages")
     
-    # Process in smaller batches to avoid memory issues
     batch_size = 50
     all_processed_docs = []
     
@@ -33,13 +29,11 @@ def main():
         batch_processed = processor.process_all_pages(batch)
         all_processed_docs.extend(batch_processed)
         
-        # Clear memory
         del batch_processed
         del batch
     
     print(f"Processing complete. Generated {len(all_processed_docs)} document chunks.")
     
-    # Save processed data
     processor.save_processed_data(all_processed_docs, "processed_documents.json")
     print("Saved to processed_documents.json")
 

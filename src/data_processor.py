@@ -1,7 +1,3 @@
-"""
-Data processing module for cleaning and preparing scraped data for RAG system.
-Handles text cleaning, chunking, and metadata extraction.
-"""
 import re
 import json
 from typing import List, Dict, Any, Optional
@@ -13,7 +9,6 @@ from pathlib import Path
 
 @dataclass
 class ProcessedDocument:
-    """Data class for processed documents."""
     id: str
     title: str
     content: str
@@ -24,35 +19,17 @@ class ProcessedDocument:
 
 
 class DataProcessor:
-    """
-    Data processor for cleaning and preparing scraped data.
-    
-    Features:
-    - Text cleaning and normalization
-    - Content chunking for optimal RAG performance
-    - Metadata extraction and enrichment
-    - Quality filtering
-    """
     
     def __init__(self, chunk_size: int = 500, chunk_overlap: int = 100):
-        """
-        Initialize the data processor.
-        
-        Args:
-            chunk_size: Maximum size of each text chunk
-            chunk_overlap: Overlap between consecutive chunks
-        """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
-        # Text cleaning patterns
         self.cleanup_patterns = [
             (r'\s+', ' '),  # Multiple whitespace to single space
             (r'\n+', '\n'),  # Multiple newlines to single newline
             (r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\"\'\/]', ''),  # Remove special chars
         ]
         
-        # Stop words and common phrases to filter out
         self.stop_phrases = [
             'cookie policy', 'privacy policy', 'terms of service',
             'all rights reserved', 'copyright', 'follow us on',
@@ -62,42 +39,21 @@ class DataProcessor:
         logger.info(f"DataProcessor initialized with chunk_size={chunk_size}, overlap={chunk_overlap}")
     
     def clean_text(self, text: str) -> str:
-        """
-        Clean and normalize text content.
-        
-        Args:
-            text: Raw text to clean
-            
-        Returns:
-            Cleaned text
-        """
         if not text:
             return ""
         
-        # Apply cleanup patterns
         cleaned = text
         for pattern, replacement in self.cleanup_patterns:
             cleaned = re.sub(pattern, replacement, cleaned)
         
-        # Remove stop phrases
         for phrase in self.stop_phrases:
             cleaned = re.sub(re.escape(phrase), '', cleaned, flags=re.IGNORECASE)
         
-        # Remove extra whitespace
         cleaned = cleaned.strip()
         
         return cleaned
     
     def extract_metadata(self, page_data: Dict) -> Dict[str, Any]:
-        """
-        Extract and enrich metadata from page data.
-        
-        Args:
-            page_data: Raw page data from scraper
-            
-        Returns:
-            Enriched metadata dictionary
-        """
         metadata = {
             'url': page_data.get('url', ''),
             'title': page_data.get('title', ''),
@@ -110,7 +66,6 @@ class DataProcessor:
             'domain': 'gailonline.com'
         }
         
-        # Extract page type from URL
         url = page_data.get('url', '')
         if '/news/' in url:
             metadata['page_type'] = 'news'
@@ -125,48 +80,32 @@ class DataProcessor:
         else:
             metadata['page_type'] = 'general'
         
-        # Extract headings for better context
         headings = page_data.get('headings', [])
         metadata['main_headings'] = [h['text'] for h in headings if h['level'] in ['h1', 'h2']]
         
         return metadata
     
     def chunk_text(self, text: str, title: str = "") -> List[str]:
-        """
-        Split text into overlapping chunks for better RAG performance.
-        
-        Args:
-            text: Text to chunk
-            title: Document title for context
-            
-        Returns:
-            List of text chunks
-        """
         if not text or len(text) <= self.chunk_size:
             return [text] if text else []
         
         chunks = []
         words = text.split()
         
-        # Add title to first chunk if available
         title_prefix = f"{title}\n\n" if title else ""
         
         start = 0
         while start < len(words):
-            # Calculate end position
             end = min(start + self.chunk_size, len(words))
             
-            # Create chunk
             chunk_words = words[start:end]
             chunk_text = " ".join(chunk_words)
             
-            # Add title to first chunk
             if start == 0 and title_prefix:
                 chunk_text = title_prefix + chunk_text
             
             chunks.append(chunk_text)
             
-            # Move start position with overlap
             start = end - self.chunk_overlap
             if start >= len(words):
                 break
@@ -174,31 +113,18 @@ class DataProcessor:
         return chunks
     
     def is_quality_content(self, page_data: Dict) -> bool:
-        """
-        Check if page content meets quality standards.
-        
-        Args:
-            page_data: Page data to evaluate
-            
-        Returns:
-            True if content meets quality standards
-        """
         content = page_data.get('content', '')
         word_count = page_data.get('word_count', 0)
         
-        # Minimum word count
         if word_count < 50:
             return False
         
-        # Check for meaningful content
         if len(content.strip()) < 100:
             return False
         
-        # Check for too many repeated characters (likely corrupted)
         if any(char * 10 in content for char in [' ', '\n', '\t']):
             return False
         
-        # Check for meaningful sentences
         sentences = content.split('.')
         meaningful_sentences = [s for s in sentences if len(s.strip()) > 10]
         
@@ -208,31 +134,18 @@ class DataProcessor:
         return True
     
     def process_page(self, page_data: Dict) -> List[ProcessedDocument]:
-        """
-        Process a single page into document chunks.
-        
-        Args:
-            page_data: Raw page data from scraper
-            
-        Returns:
-            List of processed document chunks
-        """
         if not self.is_quality_content(page_data):
             logger.warning(f"Skipping low-quality content: {page_data.get('url', 'unknown')}")
             return []
         
-        # Clean content
         cleaned_content = self.clean_text(page_data.get('content', ''))
         if not cleaned_content:
             return []
         
-        # Extract metadata
         metadata = self.extract_metadata(page_data)
         
-        # Chunk the content
         chunks = self.chunk_text(cleaned_content, page_data.get('title', ''))
         
-        # Create processed documents
         processed_docs = []
         for i, chunk in enumerate(chunks):
             doc_id = f"{page_data.get('url', 'unknown')}_chunk_{i}"
@@ -253,15 +166,6 @@ class DataProcessor:
         return processed_docs
     
     def process_all_pages(self, scraped_data: List[Dict]) -> List[ProcessedDocument]:
-        """
-        Process all scraped pages into document chunks.
-        
-        Args:
-            scraped_data: List of raw page data from scraper
-            
-        Returns:
-            List of all processed document chunks
-        """
         logger.info(f"Processing {len(scraped_data)} pages")
         
         all_processed_docs = []
@@ -288,14 +192,6 @@ class DataProcessor:
         return all_processed_docs
     
     def save_processed_data(self, processed_docs: List[ProcessedDocument], filename: str = "processed_documents.json"):
-        """
-        Save processed documents to JSON file.
-        
-        Args:
-            processed_docs: List of processed documents
-            filename: Output filename
-        """
-        # Convert to dictionary format for JSON serialization
         data_to_save = []
         for doc in processed_docs:
             data_to_save.append({
@@ -314,15 +210,6 @@ class DataProcessor:
         logger.info(f"Processed data saved to {filename}")
     
     def load_processed_data(self, filename: str = "processed_documents.json") -> List[ProcessedDocument]:
-        """
-        Load processed documents from JSON file.
-        
-        Args:
-            filename: Input filename
-            
-        Returns:
-            List of processed documents
-        """
         if not Path(filename).exists():
             logger.warning(f"File {filename} not found")
             return []
@@ -348,7 +235,6 @@ class DataProcessor:
 
 
 def main():
-    """Main function to process scraped data."""
     import sys
     
     if len(sys.argv) < 2:
@@ -357,15 +243,12 @@ def main():
     
     scraped_file = sys.argv[1]
     
-    # Load scraped data
     with open(scraped_file, 'r', encoding='utf-8') as f:
         scraped_data = json.load(f)
     
-    # Process data
     processor = DataProcessor()
     processed_docs = processor.process_all_pages(scraped_data)
     
-    # Save processed data
     processor.save_processed_data(processed_docs)
     
     print(f"Processing complete. Generated {len(processed_docs)} document chunks.")

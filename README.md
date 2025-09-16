@@ -2,7 +2,7 @@
 
 A comprehensive Retrieval-Augmented Generation (RAG) system that scrapes data from GAIL's official website and provides intelligent question-answering capabilities through a modern web interface.
 
-## 🚀 Features
+##  Features
 
 - **Comprehensive Web Scraping**: Async scraping of GAIL's entire website with respectful crawling
 - **Intelligent Data Processing**: Text cleaning, chunking, and metadata extraction
@@ -12,13 +12,13 @@ A comprehensive Retrieval-Augmented Generation (RAG) system that scrapes data fr
 - **Source Attribution**: Transparent source citations for all responses
 - **Conversation Memory**: Context-aware conversations with history management
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Python 3.8 or higher
 - OpenAI API key
 - Internet connection for web scraping
 
-## 🛠️ Installation
+##  Installation
 
 1. **Clone the repository**:
    ```bash
@@ -40,7 +40,7 @@ A comprehensive Retrieval-Augmented Generation (RAG) system that scrapes data fr
 4. **Configure settings** (optional):
    Edit `config.py` to customize scraping parameters, model settings, etc.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Option 1: Full Pipeline (Recommended)
 
@@ -78,7 +78,7 @@ This will:
    python src/web_app.py
    ```
 
-## 🌐 Usage
+##  Usage
 
 1. **Start the application**:
    ```bash
@@ -92,7 +92,7 @@ This will:
 
 3. **Start chatting** with the GAIL assistant!
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 gail-rag-chatbot/
@@ -118,7 +118,7 @@ gail-rag-chatbot/
 └── README.md              # This file
 ```
 
-## ⚙️ Configuration
+##  Configuration
 
 ### Environment Variables
 
@@ -163,7 +163,7 @@ The web application provides the following API endpoints:
 - `POST /api/clear-history` - Clear conversation history
 - `GET /api/health` - Health check
 
-## 📊 System Components
+##  System Components
 
 ### 1. Web Scraper (`src/scraper.py`)
 
@@ -201,7 +201,7 @@ The web application provides the following API endpoints:
 - **Real-time chat** interface
 - **Source visualization**
 
-## 🎯 Example Queries
+##  Example Queries
 
 Try asking the GAIL assistant:
 
@@ -212,7 +212,7 @@ Try asking the GAIL assistant:
 - "Tell me about GAIL's pipeline network"
 - "What are GAIL's CSR initiatives?"
 
-## 🔍 Monitoring and Logging
+##  Monitoring and Logging
 
 The system includes comprehensive logging using `loguru`:
 
@@ -224,7 +224,7 @@ The system includes comprehensive logging using `loguru`:
 
 Logs are displayed in the console and can be configured for file output.
 
-## 🚨 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -253,7 +253,7 @@ Logs are displayed in the console and can be configured for file output.
 - **Use smaller embedding models** for faster processing
 - **Implement caching** for frequently asked questions
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -261,11 +261,11 @@ Logs are displayed in the console and can be configured for file output.
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - GAIL (India) Limited for providing the source data
 - OpenAI for the GPT models
@@ -273,7 +273,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - FastAPI for the web framework
 - All open-source contributors
 
-## 📞 Support
+##  Support
 
 For issues and questions:
 

@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Installation script for GAIL RAG Chatbot System
-Handles Python 3.13 compatibility issues
-"""
 import sys
 import subprocess
 import os
@@ -10,7 +6,6 @@ from pathlib import Path
 
 
 def check_python_version():
-    """Check if Python version is compatible."""
     version = sys.version_info
     print(f"Python version: {version.major}.{version.minor}.{version.micro}")
     
@@ -27,15 +22,12 @@ def check_python_version():
 
 
 def install_packages(requirements_file):
-    """Install packages from requirements file."""
     print(f"Installing packages from {requirements_file}...")
     
     try:
-        # Upgrade pip first
         subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"], 
                       check=True)
         
-        # Install requirements
         subprocess.run([sys.executable, "-m", "pip", "install", "-r", requirements_file], 
                       check=True)
         
@@ -48,7 +40,6 @@ def install_packages(requirements_file):
 
 
 def create_directories():
-    """Create necessary directories."""
     directories = ["logs", "static/css", "static/js", "templates", "chroma_db"]
     
     for directory in directories:
@@ -57,20 +48,12 @@ def create_directories():
 
 
 def create_env_file():
-    """Create .env file if it doesn't exist."""
     if not Path(".env").exists():
-        env_content = """# OpenAI API Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Database Configuration
+        env_content = """OPENAI_API_KEY=your_openai_api_key_here
 CHROMA_PERSIST_DIRECTORY=./chroma_db
-
-# Web Scraping Configuration
 USER_AGENT=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
 REQUEST_DELAY=1
 MAX_RETRIES=3
-
-# Application Configuration
 DEBUG=True
 HOST=0.0.0.0
 PORT=8000
@@ -81,20 +64,12 @@ PORT=8000
 
 
 def main():
-    """Main installation function."""
     print("🚀 GAIL RAG Chatbot System - Installation")
     print("=" * 50)
     
-    # Check Python version
     python_type = check_python_version()
-    
-    # Create directories
     create_directories()
-    
-    # Create .env file
     create_env_file()
-    
-    # Install packages
     if python_type == "py313":
         requirements_file = "requirements-py313.txt"
     else:

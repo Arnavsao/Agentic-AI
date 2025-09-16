@@ -1,7 +1,3 @@
-"""
-RAG (Retrieval-Augmented Generation) system implementation.
-Combines vector search with LLM for intelligent question answering.
-"""
 import os
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
@@ -13,7 +9,6 @@ from src.vector_store import VectorStore
 
 @dataclass
 class RAGResponse:
-    """Data class for RAG system responses."""
     answer: str
     sources: List[Dict[str, Any]]
     confidence: float
@@ -22,36 +17,17 @@ class RAGResponse:
 
 
 class RAGSystem:
-    """
-    RAG system for intelligent question answering using GAIL website data.
-    
-    Features:
-    - Context retrieval from vector store
-    - LLM-powered answer generation
-    - Source attribution and confidence scoring
-    - Query optimization and expansion
-    - Conversation memory
-    """
     
     def __init__(self, vector_store: VectorStore, model_name: str = "gpt-3.5-turbo"):
-        """
-        Initialize the RAG system.
-        
-        Args:
-            vector_store: Initialized vector store instance
-            model_name: OpenAI model name to use
-        """
         self.vector_store = vector_store
         self.model_name = model_name
         
-        # Initialize OpenAI client
         if not settings.openai_api_key:
             raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY in environment variables.")
         
         openai.api_key = settings.openai_api_key
         self.client = openai.OpenAI(api_key=settings.openai_api_key)
         
-        # System prompt for the RAG system
         self.system_prompt = """You are an intelligent assistant specialized in answering questions about GAIL (Gas Authority of India Limited) based on their official website content.
 
 Your role:
@@ -70,30 +46,17 @@ Guidelines:
 
 Context will be provided with each query. Use this context to provide accurate and comprehensive answers."""
 
-        # Conversation memory
         self.conversation_history: List[Dict[str, str]] = []
         
         logger.info(f"RAG System initialized with model: {model_name}")
     
     def optimize_query(self, query: str) -> str:
-        """
-        Optimize the search query for better retrieval.
-        
-        Args:
-            query: Original user query
-            
-        Returns:
-            Optimized query string
-        """
-        # Add GAIL-specific context to improve retrieval
         gail_keywords = ["GAIL", "Gas Authority of India", "natural gas", "pipeline", "energy"]
         
-        # Check if query already contains GAIL-specific terms
         query_lower = query.lower()
         has_gail_context = any(keyword.lower() in query_lower for keyword in gail_keywords)
         
         if not has_gail_context:
-            # Add GAIL context to improve retrieval
             optimized_query = f"GAIL {query}"
         else:
             optimized_query = query
@@ -102,20 +65,7 @@ Context will be provided with each query. Use this context to provide accurate a
         return optimized_query
     
     def retrieve_context(self, query: str, n_results: int = 5) -> Tuple[List[Dict], str]:
-        """
-        Retrieve relevant context from the vector store.
-        
-        Args:
-            query: Search query
-            n_results: Number of results to retrieve
-            
-        Returns:
-            Tuple of (search_results, combined_context)
-        """
-        # Optimize query
         optimized_query = self.optimize_query(query)
-        
-        # Search vector store
         search_results = self.vector_store.search(
             query=optimized_query,
             n_results=n_results,
@@ -126,7 +76,6 @@ Context will be provided with each query. Use this context to provide accurate a
             logger.warning(f"No relevant context found for query: {query}")
             return [], ""
         
-        # Combine context from top results
         context_parts = []
         for i, result in enumerate(search_results):
             source_info = f"Source {i+1}: {result['metadata'].get('title', 'Unknown')} (URL: {result['metadata'].get('url', 'Unknown')})"
@@ -143,26 +92,12 @@ Context will be provided with each query. Use this context to provide accurate a
         context: str, 
         conversation_history: Optional[List[Dict]] = None
     ) -> Tuple[str, float]:
-        """
-        Generate answer using LLM with retrieved context.
-        
-        Args:
-            query: User question
-            context: Retrieved context
-            conversation_history: Previous conversation context
-            
-        Returns:
-            Tuple of (answer, confidence_score)
-        """
         try:
-            # Prepare messages
             messages = [{"role": "system", "content": self.system_prompt}]
             
-            # Add conversation history if available
             if conversation_history:
                 messages.extend(conversation_history[-6:])  # Last 6 exchanges
             
-            # Add current context and query
             context_message = f"""Based on the following context from GAIL's official website, please answer the user's question:
 
 CONTEXT:
@@ -174,7 +109,6 @@ Please provide a comprehensive answer based on the context above. If the context
             
             messages.append({"role": "user", "content": context_message})
             
-            # Generate response
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
@@ -185,7 +119,6 @@ Please provide a comprehensive answer based on the context above. If the context
             
             answer = response.choices[0].message.content.strip()
             
-            # Calculate confidence based on response length and context usage
             confidence = min(0.9, len(answer) / 200)  # Simple confidence metric
             
             logger.info(f"Generated answer with confidence: {confidence:.2f}")
@@ -196,19 +129,8 @@ Please provide a comprehensive answer based on the context above. If the context
             return f"I apologize, but I encountered an error while generating a response. Please try again.", 0.0
     
     def process_query(self, query: str, include_sources: bool = True) -> RAGResponse:
-        """
-        Process a user query and return a comprehensive response.
-        
-        Args:
-            query: User question
-            include_sources: Whether to include source information
-            
-        Returns:
-            RAGResponse object with answer and metadata
-        """
         logger.info(f"Processing query: {query}")
         
-        # Retrieve relevant context
         search_results, context = self.retrieve_context(query)
         
         if not context:
@@ -220,10 +142,8 @@ Please provide a comprehensive answer based on the context above. If the context
                 context_used=""
             )
         
-        # Generate answer
         answer, confidence = self.generate_answer(query, context, self.conversation_history)
         
-        # Prepare sources
         sources = []
         if include_sources and search_results:
             for result in search_results:
@@ -235,11 +155,9 @@ Please provide a comprehensive answer based on the context above. If the context
                 }
                 sources.append(source)
         
-        # Update conversation history
         self.conversation_history.append({"role": "user", "content": query})
         self.conversation_history.append({"role": "assistant", "content": answer})
         
-        # Keep only recent history (last 10 exchanges)
         if len(self.conversation_history) > 20:
             self.conversation_history = self.conversation_history[-20:]
         
@@ -255,13 +173,6 @@ Please provide a comprehensive answer based on the context above. If the context
         return response
     
     def get_suggested_questions(self) -> List[str]:
-        """
-        Get a list of suggested questions based on available content.
-        
-        Returns:
-            List of suggested questions
-        """
-        # Get collection stats to understand available content
         stats = self.vector_store.get_collection_stats()
         page_types = stats.get('page_types', {})
         
@@ -276,7 +187,6 @@ Please provide a comprehensive answer based on the context above. If the context
             "How does GAIL contribute to India's energy sector?"
         ]
         
-        # Add type-specific suggestions based on available content
         if 'news' in page_types:
             suggestions.append("What are the latest news and updates from GAIL?")
         if 'investor' in page_types:
@@ -284,25 +194,17 @@ Please provide a comprehensive answer based on the context above. If the context
         if 'career' in page_types:
             suggestions.append("What job opportunities are available at GAIL?")
         
-        return suggestions[:8]  # Return top 8 suggestions
+        return suggestions[:8]
     
     def clear_conversation_history(self):
-        """Clear the conversation history."""
         self.conversation_history = []
         logger.info("Conversation history cleared")
     
     def get_conversation_history(self) -> List[Dict[str, str]]:
-        """
-        Get the current conversation history.
-        
-        Returns:
-            List of conversation exchanges
-        """
         return self.conversation_history.copy()
 
 
 def main():
-    """Main function for testing the RAG system."""
     import sys
     
     if len(sys.argv) < 2:
@@ -311,11 +213,9 @@ def main():
     
     query = " ".join(sys.argv[1:])
     
-    # Initialize vector store and RAG system
     vector_store = VectorStore()
     rag_system = RAGSystem(vector_store)
     
-    # Process query
     response = rag_system.process_query(query)
     
     print(f"Query: {response.query}")

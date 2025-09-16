@@ -1,0 +1,80 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+logs/
+*.log
+.env
+.env.local
+.env.production
+.env.staging
+
+# Documentation
+README.md
+DEPLOYMENT.md
+*.md
+
+# Deployment files
+docker-compose.yml
+nginx.conf
+deploy.sh
+Procfile
+runtime.txt
+cloudbuild.yaml
+aws-ecs-task-definition.json
+vercel.json
+
+# Data files (these should be mounted as volumes)
+chroma_db/
+gail_scraped_data.json
+processed_documents.json
+sample_scraped_data.json
+
+# Temporary files
+*.tmp
+*.temp
+
